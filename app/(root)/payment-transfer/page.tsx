@@ -1,31 +1,47 @@
-import HeaderBox from '@/components/HeaderBox'
-import PaymentTransferForm from '@/components/PaymentTransferForm'
-import { getAccounts } from '@/lib/actions/bank.actions';
-import { getLoggedInUser } from '@/lib/actions/user.actions';
-import React from 'react'
+import React from "react";
+import HeaderBox from "@/components/HeaderBox";
+import PaymentTransferForm from "@/components/PaymentTransferForm";
+import { getAccounts } from "@/lib/actions/bank.actions";
+import { getLoggedInUser } from "@/lib/actions/user.actions";
 
 const Transfer = async () => {
   const loggedIn = await getLoggedInUser();
-  const accounts = await getAccounts({ 
-    userId: loggedIn.$id 
-  })
 
-  if(!accounts) return;
-  
-  const accountsData = accounts?.data;
+  if (!loggedIn) {
+    return (
+      <section className="payment-transfer">
+        <HeaderBox
+          title="Payment Transfer"
+          subtext="Please sign in to make a payment transfer."
+        />
+      </section>
+    );
+  }
+
+  const accountsResponse = await getAccounts({
+    userId: loggedIn.$id,
+  });
+
+  const accounts = accountsResponse?.data ?? [];
 
   return (
     <section className="payment-transfer">
-      <HeaderBox 
+      <HeaderBox
         title="Payment Transfer"
-        subtext="Please provide any specific details or notes related to the payment transfer"
+        subtext="Provide the required details to complete your payment transfer."
       />
 
       <section className="size-full pt-5">
-        <PaymentTransferForm accounts={accountsData} />
+        {accounts.length === 0 ? (
+          <p className="text-gray-500">
+            You need at least one bank account to make a transfer.
+          </p>
+        ) : (
+          <PaymentTransferForm accounts={accounts} />
+        )}
       </section>
     </section>
-  )
-}
+  );
+};
 
-export default Transfer
+export default Transfer;
